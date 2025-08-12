@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 255 255 255;
+  --foreground: 15 23 42;
+  --card: 255 255 255;
+  --muted: 241 245 249;
+  --border: 226 232 240;
+  --primary: 17 24 39;
+  --primary-foreground: 255 255 255;
+}
+
+html, body, #root { height: 100%; }
+body { background: rgb(var(--background)); color: rgb(var(--foreground)); }
+
+.bg-background { background-color: rgb(var(--background)); }
+.text-foreground { color: rgb(var(--foreground)); }
+.bg-card { background-color: rgb(var(--card)); }
+.bg-muted { background-color: rgb(var(--muted)); }
+.text-muted-foreground { color: #64748b; }
+.bg-primary { background-color: rgb(var(--primary)); }
+.text-primary-foreground { color: rgb(var(--primary-foreground)); }
+.bg-border { background-color: rgb(var(--border)); }
+.border { border-color: rgb(var(--border)); }
