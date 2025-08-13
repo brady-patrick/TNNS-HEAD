@@ -11,6 +11,153 @@ import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Inpu
 const cn = (...c: Array<string | undefined | false>) => c.filter(Boolean).join(" ");
 
 // ============================================================
+// Event Details Modal Component
+// ============================================================
+interface EventDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  event: any;
+  playerName: string;
+}
+
+const EventDetailsModal = ({ isOpen, onClose, event, playerName }: EventDetailsModalProps) => {
+  if (!isOpen || !event) return null;
+
+  const style = TYPE_STYLES[event.type as keyof typeof TYPE_STYLES] ?? TYPE_STYLES.event;
+  
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 w-[400px] max-h-[80vh] overflow-y-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`inline-flex w-10 h-10 items-center justify-center rounded-lg ring-1 ${style.ring} ${style.bg}`}>
+            <span className="text-2xl">{style.icon}</span>
+          </span>
+          <div>
+            <div className="font-medium text-lg">{event.title}</div>
+            <div className="text-sm text-slate-500">{event.date}</div>
+          </div>
+        </div>
+
+        {/* Event details grid */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="rounded-lg bg-slate-50 p-3">
+            <div className="text-slate-500 text-sm">Date</div>
+            <div className="font-medium">{event.date}</div>
+          </div>
+          <div className="rounded-lg bg-slate-50 p-3">
+            <div className="text-slate-500 text-sm">Type</div>
+            <div className="font-medium capitalize">{event.type}</div>
+          </div>
+          <div className="rounded-lg bg-slate-50 p-3 col-span-2">
+            <div className="text-slate-500 text-sm">Player</div>
+            <div className="font-medium">{playerName}</div>
+          </div>
+        </div>
+
+        {/* Event-specific details */}
+        {event.type === "match" && (
+          <div className="mb-4">
+            <div className="text-slate-500 text-sm mb-2">Match Details</div>
+            <div className="rounded-lg border border-slate-200 p-3 bg-white">
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Score</span>
+                <span className="font-medium">{event.score}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Result</span>
+                <span className={`font-medium ${event.result === "W" ? "text-green-600" : "text-red-600"}`}>
+                  {event.result === "W" ? "Win" : "Loss"}
+                </span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">UTR Change</span>
+                <span className={`font-medium ${event.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                  {event.utrChange}
+                </span>
+              </div>
+              {event.location && (
+                <div className="flex justify-between py-2">
+                  <span className="text-slate-500">Location</span>
+                  <span className="font-medium">{event.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {event.type === "event" && (
+          <div className="mb-4">
+            <div className="text-slate-500 text-sm mb-2">Tournament Details</div>
+            <div className="rounded-lg border border-slate-200 p-3 bg-white">
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Finish</span>
+                <span className="font-medium">{event.finish}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Matches</span>
+                <span className="font-medium">{event.matches}</span>
+              </div>
+              {event.draw && (
+                <div className="flex justify-between py-2">
+                  <span className="text-slate-500">Draw</span>
+                  <span className="font-medium">{event.draw}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {event.type === "coaching" && (
+          <div className="mb-4">
+            <div className="text-slate-500 text-sm mb-2">Session Details</div>
+            <div className="rounded-lg border border-slate-200 p-3 bg-white">
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Duration</span>
+                <span className="font-medium">{event.duration}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Coach</span>
+                <span className="font-medium">{event.coach}</span>
+              </div>
+              {event.saved && (
+                <div className="flex justify-between py-2">
+                  <span className="text-slate-500">Saved</span>
+                  <span className="font-medium">{event.saved}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Meta information */}
+        {event.meta && (
+          <div className="mb-4">
+            <div className="text-slate-500 text-sm mb-2">Additional Info</div>
+            <div className="rounded-lg border border-slate-200 p-3 bg-white">
+              <div className="text-sm">{event.meta}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+          <button className="rounded-lg bg-slate-900 px-4 py-2 text-white text-sm hover:bg-slate-800 transition-colors">
+            Add to schedule
+          </button>
+          <button 
+            className="rounded-lg px-4 py-2 border border-slate-300 text-slate-600 text-sm hover:bg-slate-50 transition-colors" 
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================
 // Optimized header with non-blocking avatar
 // ============================================================
 const PLACEHOLDER_AVATAR =
@@ -234,6 +381,72 @@ const tennisStats = {
   }
 };
 
+// Journey data aligned with TennisJourneyMap component styles
+const journey = [
+  { 
+    id: "j1", 
+    type: "match", 
+    title: "USTA L4 vs. J. Cruz", 
+    date: "Jul 28", 
+    meta: "UTR Verified", 
+    result: "W", 
+    utrChange: "+0.2",
+    score: "6-4 6-4",
+    location: "Fort Collins, CO"
+  },
+  { 
+    id: "j2", 
+    type: "event", 
+    title: "USTA L6 Poudre Open", 
+    date: "Jul 21", 
+    meta: "3 matches", 
+    finish: "QF", 
+    matches: 3,
+    draw: "Girls 18s"
+  },
+  { 
+    id: "j3", 
+    type: "coaching", 
+    title: "AI session: Serve toss drift", 
+    date: "Jul 18", 
+    meta: "Drill plan saved", 
+    duration: "45m", 
+    saved: "Drill Plan",
+    coach: "AI Coach"
+  },
+  { 
+    id: "j4", 
+    type: "match", 
+    title: "USTA L4 vs. M. Zhou", 
+    date: "Jul 15", 
+    meta: "UTR Verified", 
+    result: "L", 
+    utrChange: "-0.1",
+    score: "7-6(5) 6-3",
+    location: "Boulder, CO"
+  },
+  { 
+    id: "j5", 
+    type: "event", 
+    title: "UTR 7.5+ Challenge", 
+    date: "Jul 10", 
+    meta: "4 matches", 
+    finish: "SF", 
+    matches: 4,
+    draw: "Girls 18s"
+  },
+  { 
+    id: "j6", 
+    type: "coaching", 
+    title: "AI session: Backhand consistency", 
+    date: "Jul 08", 
+    meta: "Progress tracked", 
+    duration: "60m", 
+    saved: "Progress",
+    coach: "AI Coach"
+  },
+];
+
 const suggestedPlayers = [
   { id: 1, name: "Maya Patel", utr: 7.5, location: "Longmont, CO", handed: "Right", style: "Aggressive Baseliner" },
   { id: 2, name: "Dylan Park", utr: 8.1, location: "Loveland, CO", handed: "Left", style: "All Court" },
@@ -245,14 +458,65 @@ const upcomingEvents = [
   { id: 12, name: "Northern CO UTR 8", date: "Sep 02", city: "Fort Collins", surface: "Hard" },
 ];
 
-const journey = [
-  { id: "j1", type: "match", title: "Won 6-4 6-4 vs J. Cruz", date: "Jul 28", meta: "UTR Verified", result: "W", utrChange: "+0.2" },
-  { id: "j2", type: "event", title: "Quarterfinals at L6 Poudre Open", date: "Jul 21", meta: "3 matches", finish: "QF", matches: 3 },
-  { id: "j3", type: "training", title: "AI session: Serve toss drift", date: "Jul 18", meta: "Drill plan saved", duration: "45m", saved: "Drill Plan" },
-  { id: "j4", type: "match", title: "Lost 7-6(5) 6-3 to M. Zhou", date: "Jul 15", meta: "UTR Verified", result: "L", utrChange: "-0.1" },
-  { id: "j5", type: "event", title: "Semifinals at UTR 7.5+ Challenge", date: "Jul 10", meta: "4 matches", finish: "SF", matches: 4 },
-  { id: "j6", type: "training", title: "AI session: Backhand consistency", date: "Jul 08", meta: "Progress tracked", duration: "60m", saved: "Progress" },
-];
+
+
+// Type styles aligned with TennisJourneyMap component
+const TYPE_STYLES = {
+  match: {
+    bg: "bg-emerald-50",
+    ring: "ring-emerald-300",
+    text: "text-emerald-900",
+    chip: "bg-emerald-100 text-emerald-700",
+    status: "completed",
+    icon: "🏆"
+  },
+  coaching: {
+    bg: "bg-sky-50",
+    ring: "ring-sky-300",
+    text: "text-sky-900",
+    chip: "bg-sky-100 text-sky-700",
+    status: "completed",
+    icon: "📚"
+  },
+  event: {
+    bg: "bg-violet-50",
+    ring: "ring-violet-300",
+    text: "text-violet-900",
+    chip: "bg-violet-100 text-violet-700",
+    status: "completed",
+    icon: "🎯"
+  },
+  suggested: {
+    bg: "bg-amber-50",
+    ring: "ring-amber-300",
+    text: "text-amber-900",
+    chip: "bg-amber-100 text-amber-700",
+    status: "pending",
+    icon: "⏳"
+  },
+};
+
+// Status styles aligned with TennisJourneyMap component
+const STATUS_STYLES = {
+  completed: {
+    bg: "bg-green-100",
+    text: "text-green-800",
+    icon: "✓",
+    ring: "ring-green-300"
+  },
+  pending: {
+    bg: "bg-yellow-100", 
+    text: "text-yellow-800",
+    icon: "⏳",
+    ring: "ring-yellow-300"
+  },
+  inProgress: {
+    bg: "bg-blue-100",
+    text: "text-blue-800", 
+    icon: "🔄",
+    ring: "ring-blue-300"
+  }
+};
 
 // ---------- Helper UI ----------
 const Metric = memo(function Metric({ label, value, sub, trend }: { label: string; value: React.ReactNode; sub?: string; trend?: "positive" | "negative" }) {
@@ -312,6 +576,12 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
   // Defer heavy lists until after first paint
   const [mounted, setMounted] = useState(false);
   const [journeyModalOpen, setJourneyModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  
+  // Handle event click to open details modal
+  const handleEventClick = (event: any) => {
+    setSelectedEvent(event);
+  };
   
   useEffect(() => {
     let raf1: number | null = null;
@@ -356,11 +626,11 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
 
       {/* Journey timeline - Full width */}
       <Card className="col-span-1 lg:col-span-3 shadow-sm overflow-hidden">
-        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+        <CardHeader className="border-b bg-gradient-to-r from-emerald-50 to-sky-50">
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl text-gray-900">Your Tennis Journey</CardTitle>
-              <CardDescription className="text-sm text-gray-600">Track your progress, achievements, and growth as a player</CardDescription>
+              <CardDescription className="text-sm text-gray-600">Track your progress, achievements, and growth as a player • Click any event for details</CardDescription>
             </div>
             <Button 
               variant="outline" 
@@ -377,96 +647,91 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
             {/* Vertical Timeline (default) */}
             <div className="block xl:1800:hidden">
               {/* Timeline line */}
-              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-200 via-indigo-200 to-purple-200 animate-pulse"></div>
+              <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-emerald-200 via-sky-200 to-violet-200 animate-pulse"></div>
               
               <div className="space-y-0">
                 {mounted ? (
-                  journey.map((j, index) => (
-                    <div key={j.id} className="relative group hover:bg-gray-50 transition-colors">
-                      {/* Timeline dot */}
-                      <div className={`absolute left-6 top-6 w-4 h-4 rounded-full border-4 border-white shadow-lg z-10 ${
-                        j.type === "match" ? "bg-gradient-to-r from-green-500 to-emerald-500" :
-                        j.type === "event" ? "bg-gradient-to-r from-orange-500 to-amber-500" :
-                        "bg-gradient-to-r from-purple-500 to-pink-500"
-                      }`}></div>
-                      
-                      <div className="pl-20 pr-6 py-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                                j.type === "match" ? "bg-gradient-to-r from-green-100 to-emerald-100" :
-                                j.type === "event" ? "bg-gradient-to-r from-orange-100 to-amber-100" :
-                                "bg-gradient-to-r from-purple-100 to-pink-100"
-                              }`}>
-                                {j.type === "match" ? <Trophy className="h-4 w-4 text-green-600" /> : 
-                                 j.type === "event" ? <Calendar className="h-4 w-4 text-orange-600" /> : 
-                                 <Sparkles className="h-4 w-4 text-purple-600" />}
+                  journey.map((j, index) => {
+                    const style = TYPE_STYLES[j.type as keyof typeof TYPE_STYLES] ?? TYPE_STYLES.event;
+                    const statusStyle = STATUS_STYLES[style.status as keyof typeof STATUS_STYLES] ?? STATUS_STYLES.completed;
+                    
+                    return (
+                      <div key={j.id} className="relative group hover:bg-gray-50 transition-colors cursor-pointer hover:shadow-md" onClick={() => handleEventClick(j)}>
+                        {/* Timeline dot */}
+                        <div className={`absolute left-6 top-6 w-4 h-4 rounded-full border-4 border-white shadow-lg z-10 ${style.bg}`}></div>
+                        
+                        <div className="pl-20 pr-6 py-6">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${style.bg} ${style.ring}`}>
+                                  <span className="text-lg">{style.icon}</span>
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">{j.title}</h4>
+                                  <p className="text-sm text-gray-500">{j.date}</p>
+                                </div>
                               </div>
-                              <div>
-                                <h4 className="font-semibold text-gray-900">{j.title}</h4>
-                                <p className="text-sm text-gray-500">{j.date}</p>
-                              </div>
+                              {j.meta && (
+                                <div className="flex items-center gap-2">
+                                  <Badge variant="secondary" className={`text-xs px-2 py-1 ${style.chip} border-0`}>
+                                    {j.meta}
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
-                            {j.meta && (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                                  {j.meta}
-                                </Badge>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Journey stats preview */}
-                          <div className="hidden lg:flex items-center gap-4 text-sm text-gray-500">
-                            {j.type === "match" && (
-                              <>
-                                <div className="text-center">
-                                  <div className={`font-semibold ${j.result === "W" ? "text-green-600" : "text-red-600"}`}>
-                                    {j.result}
+                            
+                            {/* Journey stats preview */}
+                            <div className="hidden lg:flex items-center gap-4 text-sm text-gray-500">
+                              {j.type === "match" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className={`font-semibold ${j.result === "W" ? "text-green-600" : "text-red-600"}`}>
+                                      {j.result}
+                                    </div>
+                                    <div className="text-xs">Result</div>
                                   </div>
-                                  <div className="text-xs">Result</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className={`font-semibold ${j.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
-                                    {j.utrChange}
+                                  <div className="text-center">
+                                    <div className={`font-semibold ${j.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                                      {j.utrChange}
+                                    </div>
+                                    <div className="text-xs">UTR</div>
                                   </div>
-                                  <div className="text-xs">UTR</div>
-                                </div>
-                              </>
-                            )}
-                            {j.type === "event" && (
-                              <>
-                                <div className="text-center">
-                                  <div className="font-semibold text-orange-600">{j.finish}</div>
-                                  <div className="text-xs">Finish</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="font-semibold text-blue-600">{j.matches}</div>
-                                  <div className="text-xs">Matches</div>
-                                </div>
-                              </>
-                            )}
-                            {j.type === "training" && (
-                              <>
-                                <div className="text-center">
-                                  <div className="font-semibold text-purple-600">{j.duration}</div>
-                                  <div className="text-xs">Duration</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="font-semibold text-green-600">{j.saved}</div>
-                                  <div className="text-xs">Saved</div>
-                                </div>
-                              </>
-                            )}
+                                </>
+                              )}
+                              {j.type === "event" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-orange-600">{j.finish}</div>
+                                    <div className="text-xs">Finish</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-blue-600">{j.matches}</div>
+                                    <div className="text-xs">Matches</div>
+                                  </div>
+                                </>
+                              )}
+                              {j.type === "coaching" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-purple-600">{j.duration}</div>
+                                    <div className="text-xs">Duration</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-green-600">{j.saved}</div>
+                                    <div className="text-xs">Saved</div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        
+                        {/* Hover effect line */}
+                        <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-transparent group-hover:bg-gradient-to-b group-hover:from-emerald-400 group-hover:to-sky-400 transition-all duration-300"></div>
                       </div>
-                      
-                      {/* Hover effect line */}
-                      <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-transparent group-hover:bg-gradient-to-b group-hover:from-blue-400 group-hover:to-indigo-400 transition-all duration-300"></div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="p-6">
                     <SkeletonLines count={3} />
@@ -478,94 +743,89 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
             {/* Horizontal Timeline (1800px and above) */}
             <div className="hidden xl:1800:block">
               {/* Horizontal timeline line */}
-              <div className="absolute xl:1800:top-8 left-0 right-0 xl:1800:h-0.5 bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-200 animate-pulse"></div>
+              <div className="absolute xl:1800:top-8 left-0 right-0 xl:1800:h-0.5 bg-gradient-to-r from-emerald-200 via-sky-200 to-violet-200 animate-pulse"></div>
               
-                             <div className="grid xl:1800:grid-cols-6 xl:1800:gap-4 xl:1800:p-6">
+              <div className="grid xl:1800:grid-cols-6 xl:1800:gap-4 xl:1800:p-6">
                 {mounted ? (
-                  journey.map((j, index) => (
-                    <div key={j.id} className="relative group hover:bg-gray-50 transition-colors rounded-lg p-4">
-                      {/* Timeline dot */}
-                      <div className={`absolute xl:1800:-top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-4 border-white shadow-lg z-10 ${
-                        j.type === "match" ? "bg-gradient-to-r from-green-500 to-emerald-500" :
-                        j.type === "event" ? "bg-gradient-to-r from-orange-500 to-amber-500" :
-                        "bg-gradient-to-r from-purple-500 to-pink-500"
-                      }`}></div>
-                      
-                                             <div className="xl:1800:pt-4">
-                        <div className="text-center">
-                                                     <div className="flex items-center justify-center xl:1800:mb-3">
-                                                         <div className={`flex items-center justify-center xl:1800:w-10 xl:1800:h-10 rounded-lg ${
-                              j.type === "match" ? "bg-gradient-to-r from-green-100 to-emerald-100" :
-                              j.type === "event" ? "bg-gradient-to-r from-orange-100 to-amber-100" :
-                              "bg-gradient-to-r from-purple-100 to-pink-100"
-                            }`}>
-                                                             {j.type === "match" ? <Trophy className="xl:1800:h-5 xl:1800:w-5 text-green-600" /> : 
-                                j.type === "event" ? <Calendar className="xl:1800:h-5 xl:1800:w-5 text-orange-600" /> : 
-                                <Sparkles className="xl:1800:h-5 xl:1800:w-5 text-purple-600" />}
+                  journey.map((j, index) => {
+                    const style = TYPE_STYLES[j.type as keyof typeof TYPE_STYLES] ?? TYPE_STYLES.event;
+                    const statusStyle = STATUS_STYLES[style.status as keyof typeof STATUS_STYLES] ?? STATUS_STYLES.completed;
+                    
+                    return (
+                      <div key={j.id} className="relative group hover:bg-gray-50 transition-colors rounded-lg p-4 cursor-pointer hover:shadow-md" onClick={() => handleEventClick(j)}>
+                        {/* Timeline dot */}
+                        <div className={`absolute xl:1800:-top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full border-4 border-white shadow-lg z-10 ${style.bg}`}></div>
+                        
+                        <div className="xl:1800:pt-4">
+                          <div className="text-center">
+                            <div className="flex items-center justify-center xl:1800:mb-3">
+                              <div className={`flex items-center justify-center xl:1800:w-10 xl:1800:h-10 rounded-lg ${style.bg} ${style.ring}`}>
+                                <span className="text-xl">{style.icon}</span>
+                              </div>
                             </div>
-                          </div>
-                                                     <div>
-                             <h4 className="font-semibold text-gray-900 xl:1800:text-sm xl:1800:mb-1 line-clamp-2">{j.title}</h4>
-                             <p className="xl:1800:text-xs text-gray-500 xl:1800:mb-2">{j.date}</p>
-                           </div>
-                          {j.meta && (
-                                                         <div className="flex justify-center xl:1800:mb-3">
-                              <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                                {j.meta}
-                              </Badge>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 xl:1800:text-sm xl:1800:mb-1 line-clamp-2">{j.title}</h4>
+                              <p className="xl:1800:text-xs text-gray-500 xl:1800:mb-2">{j.date}</p>
                             </div>
-                          )}
-                          
-                                                     {/* Journey stats preview */}
-                           <div className="xl:1800:space-y-2 xl:1800:text-xs text-gray-500">
-                            {j.type === "match" && (
-                              <>
-                                <div className="text-center">
-                                  <div className={`font-semibold ${j.result === "W" ? "text-green-600" : "text-red-600"}`}>
-                                    {j.result}
+                            {j.meta && (
+                              <div className="flex justify-center xl:1800:mb-3">
+                                <Badge variant="secondary" className={`text-xs px-2 py-1 ${style.chip} border-0`}>
+                                  {j.meta}
+                                </Badge>
+                              </div>
+                            )}
+                            
+                            {/* Journey stats preview */}
+                            <div className="xl:1800:space-y-2 xl:1800:text-xs text-gray-500">
+                              {j.type === "match" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className={`font-semibold ${j.result === "W" ? "text-green-600" : "text-red-600"}`}>
+                                      {j.result}
+                                    </div>
+                                    <div className="xl:1800:text-xs">Result</div>
                                   </div>
-                                  <div className="xl:1800:text-xs">Result</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className={`font-semibold ${j.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
-                                    {j.utrChange}
+                                  <div className="text-center">
+                                    <div className={`font-semibold ${j.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                                      {j.utrChange}
+                                    </div>
+                                    <div className="xl:1800:text-xs">UTR</div>
                                   </div>
-                                  <div className="xl:1800:text-xs">UTR</div>
-                                </div>
-                              </>
-                            )}
-                            {j.type === "event" && (
-                              <>
-                                <div className="text-center">
-                                  <div className="font-semibold text-orange-600">{j.finish}</div>
-                                  <div className="text-xs">Finish</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="font-semibold text-blue-600">{j.matches}</div>
-                                  <div className="text-xs">Matches</div>
-                                </div>
-                              </>
-                            )}
-                            {j.type === "training" && (
-                              <>
-                                <div className="text-center">
-                                  <div className="font-semibold text-purple-600">{j.duration}</div>
-                                  <div className="text-xs">Duration</div>
-                                </div>
-                                <div className="text-center">
-                                  <div className="font-semibold text-green-600">{j.saved}</div>
-                                  <div className="text-xs">Saved</div>
-                                </div>
-                              </>
-                            )}
+                                </>
+                              )}
+                              {j.type === "event" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-orange-600">{j.finish}</div>
+                                    <div className="text-xs">Finish</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-blue-600">{j.matches}</div>
+                                    <div className="text-xs">Matches</div>
+                                  </div>
+                                </>
+                              )}
+                              {j.type === "coaching" && (
+                                <>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-purple-600">{j.duration}</div>
+                                    <div className="text-xs">Duration</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-semibold text-green-600">{j.saved}</div>
+                                    <div className="text-xs">Saved</div>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
+                        
+                        {/* Hover effect line */}
+                        <div className="absolute xl:1800:top-8 left-0 right-0 xl:1800:h-0.5 bg-transparent group-hover:bg-gradient-to-r group-hover:from-emerald-400 group-hover:to-sky-400 transition-all duration-300"></div>
                       </div>
-                      
-                      {/* Hover effect line */}
-                      <div className="absolute xl:1800:top-8 left-0 right-0 xl:1800:h-0.5 bg-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-indigo-400 transition-all duration-300"></div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="col-span-6 p-6">
                     <SkeletonLines count={3} />
@@ -575,16 +835,16 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
             </div>
             
             {/* Journey progress indicator */}
-            <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t">
+            <div className="px-6 py-4 bg-gradient-to-r from-emerald-50 to-sky-50 border-t">
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600">Journey in progress</span>
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  <span className="text-emerald-700">Journey in progress</span>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-gray-500">Next milestone: UTR 8.0</span>
+                  <span className="text-sky-600">Next milestone: UTR 8.0</span>
                   <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{width: '75%'}}></div>
+                    <div className="h-full bg-gradient-to-r from-emerald-500 to-sky-500 rounded-full" style={{width: '75%'}}></div>
                   </div>
                 </div>
               </div>
@@ -676,10 +936,20 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
       <FullScreenModal
         isOpen={journeyModalOpen}
         onClose={() => setJourneyModalOpen(false)}
-        title="Tennis Journey Map"
+        title="Your Journey"
       >
         <TennisJourneyMap />
       </FullScreenModal>
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <EventDetailsModal
+          isOpen={!!selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          event={selectedEvent}
+          playerName={me.name}
+        />
+      )}
     </div>
   );
 }
