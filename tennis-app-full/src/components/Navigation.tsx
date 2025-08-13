@@ -1,13 +1,8 @@
 import React from "react";
-import {
-  Home as HomeIcon,
-  Search,
-  Users,
-  Sparkles,
-  Calendar,
-  Settings as SettingsIcon,
-} from "lucide-react";
-import { Input, Separator, Avatar, AvatarImage, AvatarFallback, Button } from "./base";
+import { Home as HomeIcon, Users, Sparkles, Calendar, Search } from "lucide-react";
+import { Input, Separator, Button } from "./base";
+import { Avatar } from "./Avatar";
+import { useUser } from "../contexts/UserContext";
 
 // Utility function for class names
 const cn = (...c: Array<string | undefined | false>) => c.filter(Boolean).join(" ");
@@ -42,15 +37,10 @@ const SidebarItem = React.memo(function SidebarItem({
 interface NavigationProps {
   route: string;
   setRoute: (route: any) => void;
-  user: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
 }
 
-export function Navigation({ route, setRoute, user }: NavigationProps) {
-  const PLACEHOLDER_AVATAR = "data:image/svg+xml;utf8,\n  <svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'>\n    <rect width='100%' height='100%' fill='%23eee'/>\n    <text x='50%' y='56%' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='24'>--</text>\n  </svg>";
+export function Navigation({ route, setRoute }: NavigationProps) {
+  const { user } = useUser();
 
   return (
     <aside className="hidden w-[280px] shrink-0 border-r bg-card p-4 md:flex md:flex-col md:h-screen">
@@ -122,10 +112,13 @@ export function Navigation({ route, setRoute, user }: NavigationProps) {
         className="w-full rounded-xl border p-3 hover:bg-muted/60 transition-colors text-left"
       >
         <div className="flex items-center gap-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar || PLACEHOLDER_AVATAR} alt={user.name} />
-            <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
-          </Avatar>
+          <Avatar 
+            src={user.avatar} 
+            alt={user.name} 
+            size="sm" 
+            fallbackText={user.name}
+            className="h-8 w-8"
+          />
           <div className="text-sm">
             <div className="font-medium">{user.name}</div>
             <div className="text-xs text-muted-foreground">{user.email}</div>

@@ -3,7 +3,9 @@ import { BarChart2, Video, Upload, Paperclip, Trophy, Calendar, Sparkles } from 
 import { TennisStatsDrawer } from "../components/StatsDrawer";
 import { FullScreenModal } from "../components/FullScreenModal";
 import TennisJourneyMap from "../components/TennisJourneyMap";
-import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Badge, Avatar, AvatarImage, AvatarFallback } from "../components/base";
+import { Button, Card, CardHeader, CardTitle, CardDescription, CardContent, Input, Badge } from "../components/base";
+import { Avatar } from "../components/Avatar";
+import { useUser } from "../contexts/UserContext";
 
 // ============================================================
 // Minimal local UI primitives (anonymized) so the file runs
@@ -168,11 +170,13 @@ const PageHeaderBannerAvatar = memo(function PageHeaderBannerAvatar({
   location,
   age,
   avatarUrl,
+  coverImageUrl,
 }: {
   name: string;
   location: string;
   age: number;
   avatarUrl?: string;
+  coverImageUrl?: string;
 }) {
   const [src, setSrc] = useState<string>(PLACEHOLDER_AVATAR);
   useEffect(() => {
@@ -188,22 +192,38 @@ const PageHeaderBannerAvatar = memo(function PageHeaderBannerAvatar({
 
   return (
     <div className="relative flex flex-col px-1 pt-1">
-      {/* Gradient banner */}
-      <div className="h-40 w-full rounded-xl bg-gradient-to-t from-[#FBC5EC] to-[#A5C0EE] lg:h-60" />
+      {/* Cover image or gradient banner */}
+      {coverImageUrl ? (
+        <div className="h-40 w-full rounded-xl lg:h-60 overflow-hidden">
+          <img 
+            src={coverImageUrl} 
+            alt="Cover" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="h-40 w-full rounded-xl bg-gradient-to-t from-[#FBC5EC] to-[#A5C0EE] lg:h-60" />
+      )}
 
       {/* Content row */}
       <div className="m-auto -mt-12 w-full px-3 lg:-mt-10 lg:px-8">
         <div className="flex flex-col gap-4 border-b pb-4 lg:flex-row lg:gap-5 lg:pb-6">
           {/* Avatar + back on mobile */}
           <div className="flex items-start justify-between">
-            <Avatar className="h-16 w-16 lg:hidden">
-              <AvatarImage src={src} alt={name} />
-              <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-            </Avatar>
-            <Avatar className="hidden h-24 w-24 lg:block">
-              <AvatarImage src={src} alt={name} />
-              <AvatarFallback>{name.slice(0, 2)}</AvatarFallback>
-            </Avatar>
+            <Avatar 
+              src={src} 
+              alt={name} 
+              size="lg" 
+              fallbackText={name}
+              className="h-16 w-16 lg:hidden"
+            />
+            <Avatar 
+              src={src} 
+              alt={name} 
+              size="xl" 
+              fallbackText={name}
+              className="hidden h-24 w-24 lg:block"
+            />
           </div>
 
           {/* Title + actions */}
@@ -231,20 +251,7 @@ const PageHeaderBannerAvatar = memo(function PageHeaderBannerAvatar({
   );
 });
 
-// ---------- Mock data ----------
-const me = {
-  name: "Olivia Rhye",
-  email: "olivia@untitledui.com",
-  avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&auto=format&fit=crop",
-  location: "Fort Collins, CO",
-  age: 17,
-  utr: 7.8,
-  usta: 1453,
-  nsl: 212,
-  utrTrend: "positive" as "positive" | "negative",
-  ustaTrend: "negative" as "positive" | "negative",
-  nslTrend: "positive" as "positive" | "negative",
-};
+
 
 // Comprehensive tennis stats data
 const tennisStats = {
@@ -573,6 +580,7 @@ function SkeletonCards({ count = 3 }: { count?: number }) {
 }
 
 export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOpen: boolean; setStatsDrawerOpen: (open: boolean) => void }) {
+  const { user } = useUser();
   // Defer heavy lists until after first paint
   const [mounted, setMounted] = useState(false);
   const [journeyModalOpen, setJourneyModalOpen] = useState(false);
@@ -602,7 +610,7 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <PageHeaderBannerAvatar name={me.name} location={me.location} age={me.age} avatarUrl={me.avatar} />
+      <PageHeaderBannerAvatar name={user.name} location={user.location} age={user.age} avatarUrl={user.avatar} coverImageUrl={user.coverImage} />
 
       {/* View All Stats Button */}
       <div className="flex items-center justify-between">
@@ -619,9 +627,9 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
 
       {/* Player Rankings Metrics */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Metric label="UTR Rating" value={me.utr} sub="Universal Tennis Rating" trend={me.utrTrend} />
-        <Metric label="USTA Ranking" value={me.usta} sub="United States Tennis Association" trend={me.ustaTrend} />
-        <Metric label="NSL Ranking" value={me.nsl} sub="National Singles Ladder" trend={me.nslTrend} />
+        <Metric label="UTR Rating" value={user.utr} sub="Universal Tennis Rating" trend={user.utrTrend} />
+        <Metric label="USTA Ranking" value={user.usta} sub="United States Tennis Association" trend={user.utrTrend} />
+        <Metric label="NSL Ranking" value={user.nsl} sub="National Singles Ladder" trend={user.nslTrend} />
       </div>
 
       {/* Journey timeline - Full width */}
@@ -884,7 +892,11 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
             suggestedPlayers.map((p) => (
               <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
                 <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8"><AvatarFallback>{p.name.slice(0,2)}</AvatarFallback></Avatar>
+                  <Avatar 
+                    size="sm" 
+                    fallbackText={p.name}
+                    className="h-8 w-8"
+                  />
                   <div>
                     <div className="text-sm font-medium">{p.name}</div>
                     <div className="text-xs text-muted-foreground">UTR {p.utr} • {p.location}</div>
@@ -947,7 +959,7 @@ export function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOp
           isOpen={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
           event={selectedEvent}
-          playerName={me.name}
+          playerName={user.name}
         />
       )}
     </div>

@@ -5,3 +5,7 @@ export * from './foundations/featured-icon/featured-icon';
 export * from './icons/untitled-ui-icons';
 export * from './Navigation';
 export * from './StatsDrawer';
+export { ImageUpload } from './ImageUpload';
+export { ImageCropper } from './ImageCropper';
+export { ErrorBoundary } from './ErrorBoundary';
+export { Avatar } from './Avatar';

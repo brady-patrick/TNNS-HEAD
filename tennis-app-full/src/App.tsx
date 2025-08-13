@@ -3,25 +3,14 @@ import { ChevronDown, ArrowLeft, Home } from "lucide-react";
 import { Navigation } from "./components/Navigation";
 import { Landing, Players, Coaching, Events, Settings } from "./pages";
 import { Button, Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "./components/base";
+import { UserProvider } from "./contexts/UserContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 // ============================================================
 // App shell with Untitled UI style sidebar
 // ============================================================
 
-// ---------- Mock data ----------
-const me = {
-  name: "Olivia Rhye",
-  email: "olivia@untitledui.com",
-  avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=256&auto=format&fit=crop",
-  location: "Fort Collins, CO",
-  age: 17,
-  utr: 7.8,
-  usta: 1453,
-  nsl: 212,
-  utrTrend: "positive" as "positive" | "negative",
-  ustaTrend: "negative" as "positive" | "negative",
-  nslTrend: "positive" as "positive" | "negative",
-};
+
 
 // ---------- App shell with Untitled UI style sidebar ----------
 
@@ -41,10 +30,35 @@ export default function App() {
   }, []);
 
   return (
+    <ErrorBoundary>
+      <UserProvider>
+        <AppContent 
+          route={route} 
+          setRoute={setRoute} 
+          statsDrawerOpen={statsDrawerOpen} 
+          setStatsDrawerOpen={setStatsDrawerOpen} 
+        />
+      </UserProvider>
+    </ErrorBoundary>
+  );
+}
+
+function AppContent({ 
+  route, 
+  setRoute, 
+  statsDrawerOpen, 
+  setStatsDrawerOpen 
+}: { 
+  route: Route; 
+  setRoute: (r: Route) => void; 
+  statsDrawerOpen: boolean; 
+  setStatsDrawerOpen: (open: boolean) => void; 
+}) {
+  return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex w-full h-screen">
         {/* Sidebar - Fixed width, always visible */}
-        <Navigation route={route} setRoute={setRoute} user={me} />
+        <Navigation route={route} setRoute={setRoute} />
 
         {/* Main content area - Fills remaining space */}
         <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${statsDrawerOpen ? 'pr-[500px] lg:pr-[500px] md:pr-[90vw]' : ''}`}>

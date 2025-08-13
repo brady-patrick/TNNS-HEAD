@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "./base/Avatar";
+import { useUser } from "../contexts/UserContext";
 
 /**
  * Interactive Tennis Journey Workflow
@@ -80,130 +81,10 @@ const STATUS_STYLES = {
   }
 };
 
-// Current user data (Olivia Rhye from the app)
-const CURRENT_USER = {
-  id: "current-user",
-  name: "Olivia Rhye",
-  utr: 7.8,
-  color: "#8b5cf6", // Purple to distinguish from other players
-  avatar: "/avatars/olivia-rhye.png",
-  isCurrentUser: true,
-  events: [
-    { id: "cu1", kind: "match", label: "USTA L4 vs. Chen", date: "2025-05-10", laneIndex: 0, meta: { score: "6-2 6-1", location: "Fort Collins, CO" } },
-    { id: "cu2", kind: "coaching", label: "Serve technique", date: "2025-05-15", laneIndex: 0, meta: { coach: "Coach Martinez", duration: "60 min" } },
-    { id: "cu3", kind: "event", label: "Colorado State Open", date: "2025-06-15", laneIndex: 0, meta: { draw: "Girls 18s" } },
-    { id: "cu4", kind: "match", label: "Quarter vs. Thompson", date: "2025-06-17", laneIndex: 0, meta: { score: "7-5 6-3" }, parent: "cu3" },
-    { id: "cu5", kind: "match", label: "Semi vs. Rodriguez", date: "2025-06-18", laneIndex: 0, meta: { score: "6-4 6-2" }, parent: "cu4" },
-    { id: "cu6", kind: "match", label: "Final vs. Ava Kim", date: "2025-06-19", laneIndex: 0, meta: { score: "6-3 6-1" }, parent: "cu5" },
-    { id: "cu7", kind: "suggested", label: "Suggested match vs. Zoe R.", date: "2025-07-15", laneIndex: 0, meta: { reason: "Similar UTR, local" }, parent: "cu6" },
-    { id: "cu8", kind: "suggested", label: "Suggested coaching: Mental game", date: "2025-07-22", laneIndex: 0, meta: { coach: "Coach Williams" }, parent: "cu6" },
-    { id: "cu9", kind: "match", label: "USTA L3 vs. Luca Rivera", date: "2025-08-05", laneIndex: 0, meta: { score: "6-4 6-2", location: "Denver, CO" } },
-    { id: "cu10", kind: "coaching", label: "Volley clinic", date: "2025-08-12", laneIndex: 0, meta: { coach: "Coach Davis", duration: "90 min" } },
-    { id: "cu11", kind: "event", label: "Rocky Mountain Open", date: "2025-09-10", laneIndex: 0, meta: { draw: "Girls 18s" } },
-    { id: "cu12", kind: "match", label: "Round 1 vs. Sarah M.", date: "2025-09-12", laneIndex: 0, meta: { score: "6-1 6-0" }, parent: "cu11" },
-    { id: "cu13", kind: "match", label: "Round 2 vs. Emma L.", date: "2025-09-13", laneIndex: 0, meta: { score: "6-3 6-2" }, parent: "cu12" },
-  ],
-};
 
-// Starter sample data - empty by default, only current user shows
-const SAMPLE_PLAYERS: any[] = [
-  {
-    id: "player-1",
-    name: "Ava Kim",
-    utr: 8.2,
-    color: "#ef4444", // Red
-    avatar: "/avatars/ava-kim.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p1-1", kind: "match", label: "USTA L4 vs. Chen", date: "2025-05-10", laneIndex: 1, meta: { score: "6-4 6-2", location: "Fort Collins, CO" } },
-      { id: "p1-2", kind: "coaching", label: "Serve technique", date: "2025-05-15", laneIndex: 1, meta: { coach: "Coach Martinez", duration: "60 min" } },
-    ]
-  },
-  {
-    id: "player-2", 
-    name: "Zoe Rodriguez",
-    utr: 7.5,
-    color: "#3b82f6", // Blue
-    avatar: "/avatars/zoe-rodriguez.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p2-1", kind: "match", label: "USTA L4 vs. Thompson", date: "2025-05-12", laneIndex: 2, meta: { score: "7-5 6-3", location: "Denver, CO" } },
-      { id: "p2-2", kind: "event", label: "Colorado State Open", date: "2025-06-15", laneIndex: 2, meta: { draw: "Girls 18s" } },
-    ]
-  },
-  {
-    id: "player-3",
-    name: "Emma Thompson",
-    utr: 7.9,
-    color: "#10b981", // Green
-    avatar: "/avatars/emma-thompson.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p3-1", kind: "coaching", label: "Volley clinic", date: "2025-05-20", laneIndex: 3, meta: { coach: "Coach Davis", duration: "90 min" } },
-      { id: "p3-2", kind: "match", label: "USTA L3 vs. Rivera", date: "2025-06-01", laneIndex: 3, meta: { score: "6-2 6-1", location: "Boulder, CO" } },
-    ]
-  },
-  {
-    id: "player-4",
-    name: "Luca Rivera",
-    utr: 8.1,
-    color: "#f59e0b", // Amber/Orange
-    avatar: "/avatars/luca-rivera.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p4-1", kind: "match", label: "USTA L3 vs. Thompson", date: "2025-06-01", laneIndex: 4, meta: { score: "2-6 1-6", location: "Boulder, CO" } },
-      { id: "p4-2", kind: "coaching", label: "Backhand improvement", date: "2025-06-08", laneIndex: 4, meta: { coach: "Coach Wilson", duration: "75 min" } },
-    ]
-  },
-  {
-    id: "player-5",
-    name: "Sarah Martinez",
-    utr: 7.3,
-    color: "#8b5cf6", // Purple
-    avatar: "/avatars/sarah-martinez.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p5-1", kind: "event", label: "Rocky Mountain Open", date: "2025-07-20", laneIndex: 5, meta: { draw: "Girls 18s" } },
-      { id: "p5-2", kind: "match", label: "Round 1 vs. Chen", date: "2025-07-22", laneIndex: 5, meta: { score: "6-3 6-4", location: "Vail, CO" } },
-    ]
-  },
-  {
-    id: "player-6",
-    name: "Chen Wei",
-    utr: 7.7,
-    color: "#06b6d4", // Cyan
-    avatar: "/avatars/chen-wei.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p6-1", kind: "match", label: "USTA L4 vs. Kim", date: "2025-05-10", laneIndex: 6, meta: { score: "2-6 2-6", location: "Fort Collins, CO" } },
-      { id: "p6-2", kind: "coaching", label: "Footwork drills", date: "2025-05-18", laneIndex: 6, meta: { coach: "Coach Johnson", duration: "45 min" } },
-    ]
-  },
-  {
-    id: "player-7",
-    name: "Coach Martinez",
-    utr: 9.2,
-    color: "#dc2626", // Dark Red
-    avatar: "/avatars/coach-martinez.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p7-1", kind: "coaching", label: "Serve technique", date: "2025-05-15", laneIndex: 7, meta: { student: "Olivia Rhye", duration: "60 min" } },
-      { id: "p7-2", kind: "coaching", label: "Serve technique", date: "2025-05-15", laneIndex: 7, meta: { student: "Ava Kim", duration: "60 min" } },
-    ]
-  },
-  {
-    id: "player-8",
-    name: "Coach Davis",
-    utr: 8.8,
-    color: "#059669", // Dark Green
-    avatar: "/avatars/coach-davis.png",
-    isCurrentUser: false,
-    events: [
-      { id: "p8-1", kind: "coaching", label: "Volley clinic", date: "2025-05-20", laneIndex: 8, meta: { student: "Emma Thompson", duration: "90 min" } },
-      { id: "p8-2", kind: "coaching", label: "Volley clinic", date: "2025-08-12", laneIndex: 8, meta: { student: "Olivia Rhye", duration: "90 min" } },
-    ]
-  }
-];
+
+
+
 
 // Types
 type EventItem = {
@@ -525,13 +406,43 @@ function usePanZoom() {
   return { state, onWheel, onMouseDown, onMouseMove, onMouseUp };
 }
 
-export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerType }: { currentUser?: PlayerType }) {
+export default function TennisJourneyMap({ currentUser }: { currentUser?: PlayerType }) {
+  const { user } = useUser();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [players, setPlayers] = useState<PlayerType[]>([currentUser as PlayerType]); // Only current user by default
+  
+  // Create current user data from UserContext
+  const currentUserData: PlayerType = useMemo(() => ({
+    id: "current-user",
+    name: user.name,
+    utr: user.utr,
+    color: "#8b5cf6", // Purple to distinguish from other players
+    avatar: user.avatar || "/avatars/olivia-rhye.png", // Use user's avatar or fallback to local file
+    isCurrentUser: true,
+    events: [
+      { id: "cu1", kind: "match", label: "USTA L4 vs. Chen", date: "2025-05-10", laneIndex: 0, meta: { score: "6-2 6-1", location: user.location || "Fort Collins, CO" } },
+      { id: "cu2", kind: "coaching", label: "Serve technique", date: "2025-05-15", laneIndex: 0, meta: { coach: "Coach Martinez", duration: "60 min", location: user.location || "Fort Collins, CO" } },
+      { id: "cu3", kind: "event", label: "Colorado State Open", date: "2025-06-15", laneIndex: 0, meta: { draw: "Girls 18s", location: user.location || "Fort Collins, CO" } },
+      { id: "cu4", kind: "match", label: "Quarter vs. Thompson", date: "2025-06-17", laneIndex: 0, meta: { score: "7-5 6-3", location: user.location || "Fort Collins, CO" }, parent: "cu3" },
+      { id: "cu5", kind: "match", label: "Semi vs. Rodriguez", date: "2025-06-18", laneIndex: 0, meta: { score: "6-4 6-2", location: user.location || "Fort Collins, CO" }, parent: "cu4" },
+      { id: "cu6", kind: "match", label: "Final vs. Ava Kim", date: "2025-06-19", laneIndex: 0, meta: { score: "6-3 6-1", location: user.location || "Fort Collins, CO" }, parent: "cu5" },
+      { id: "cu7", kind: "suggested", label: "Suggested match vs. Zoe R.", date: "2025-07-15", laneIndex: 0, meta: { reason: "Similar UTR, local", location: user.location || "Fort Collins, CO" }, parent: "cu6" },
+      { id: "cu8", kind: "suggested", label: "Suggested coaching: Mental game", date: "2025-07-22", laneIndex: 0, meta: { coach: "Coach Williams", location: user.location || "Fort Collins, CO" }, parent: "cu6" },
+      { id: "cu9", kind: "match", label: "USTA L3 vs. Luca Rivera", date: "2025-08-05", laneIndex: 0, meta: { score: "6-4 6-2", location: "Denver, CO" } },
+      { id: "cu10", kind: "coaching", label: "Volley clinic", date: "2025-08-12", laneIndex: 0, meta: { coach: "Coach Davis", duration: "90 min", location: user.location || "Fort Collins, CO" } },
+      { id: "cu11", kind: "event", label: "Rocky Mountain Open", date: "2025-09-10", laneIndex: 0, meta: { draw: "Girls 18s", location: user.location || "Fort Collins, CO" } },
+      { id: "cu12", kind: "match", label: "Round 1 vs. Sarah M.", date: "2025-09-12", laneIndex: 0, meta: { score: "6-1 6-0", location: user.location || "Fort Collins, CO" }, parent: "cu11" },
+      { id: "cu13", kind: "match", label: "Round 2 vs. Emma L.", date: "2025-09-13", laneIndex: 0, meta: { score: "6-3 6-2", location: user.location || "Fort Collins, CO" }, parent: "cu12" },
+    ],
+  }), [user]);
+  
+  // Use the currentUser prop if provided, otherwise use the data from UserContext
+  const effectiveCurrentUser = currentUser || currentUserData;
+  
+  const [players, setPlayers] = useState<PlayerType[]>([effectiveCurrentUser]); // Use effective current user
   const [visible, setVisible] = useState<Record<string, boolean>>(() => {
     const initial = Object.fromEntries(players.map((p) => [p.id, true]));
     // Ensure current user is always visible
-    initial[currentUser.id] = true;
+    initial[effectiveCurrentUser.id] = true;
     return initial;
   });
   const [selected, setSelected] = useState<SelectedEvent | null>(null);
@@ -728,7 +639,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
   // Positioned nodes/edges are disabled to remove all timeline events
   const positioned = useMemo(() => {
     return { nodes: [], edges: [] };
-  }, [activePlayers, xScale, currentUser.id, adjustedGraphWidth, adjustedGraphHeight]);
+  }, [activePlayers, xScale, effectiveCurrentUser.id, adjustedGraphWidth, adjustedGraphHeight]);
 
   // Intersections: same event id across players
   const intersections = useMemo(() => {
@@ -762,7 +673,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
   // Function to remove a player from the timeline
   const removePlayer = (playerId: string) => {
     // Don't allow removing the current user
-    if (playerId === currentUser.id) {
+    if (playerId === effectiveCurrentUser.id) {
       return;
     }
     
@@ -931,7 +842,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
     // Sort by relevance: players with overlapping events first
     filtered.sort((a, b) => {
       const aOverlaps = a.events.some(eventA => 
-        currentUser.events.some(eventB => 
+        effectiveCurrentUser.events.some(eventB => 
           eventA.id === eventB.id || 
           (eventA.meta?.location === eventB.meta?.location && 
            eventA.date === eventB.date && 
@@ -940,7 +851,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
       );
       
       const bOverlaps = b.events.some(eventA => 
-        currentUser.events.some(eventB => 
+        effectiveCurrentUser.events.some(eventB => 
           eventA.id === eventB.id || 
           (eventA.meta?.location === eventB.meta?.location && 
            eventA.date === eventB.date && 
@@ -954,7 +865,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
     });
     
     setFilteredResults(filtered);
-  }, [searchQuery, searchResults, currentUser.events, filters]);
+  }, [searchQuery, searchResults, effectiveCurrentUser.events, filters]);
 
 
 
@@ -988,7 +899,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                 };
               };
               
-              const colorScheme = p.id === currentUser.id 
+              const colorScheme = p.id === effectiveCurrentUser.id 
                 ? { bg: "bg-purple-100", ring: "ring-purple-300", text: "text-purple-900" }
                 : getPlayerColorScheme(p.color);
               
@@ -996,9 +907,9 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                 <div 
                   key={p.id} 
                   className={`inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full ring-1 ${
-                    p.id === currentUser.id ? "bg-purple-100 ring-purple-300 text-purple-900" : ""
+                    p.id === effectiveCurrentUser.id ? "bg-purple-100 ring-purple-300 text-purple-900" : ""
                   }`}
-                  style={p.id !== currentUser.id ? {
+                  style={p.id !== effectiveCurrentUser.id ? {
                     backgroundColor: colorScheme.bg,
                     borderColor: colorScheme.ring,
                     color: colorScheme.text
@@ -1008,7 +919,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                     type="checkbox"
                     checked={!!visible[p.id]}
                     onChange={() => setVisible((v) => ({ ...v, [p.id]: !v[p.id] }))}
-                    disabled={p.id === currentUser.id} // Current user can't be hidden
+                    disabled={p.id === effectiveCurrentUser.id} // Current user can't be hidden
                   />
                   <span className="inline-flex items-center gap-1">
                     <Avatar className="w-5 h-5">
@@ -1022,9 +933,9 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                       {p.avatar ? '✓' : '✗'}
                     </div>
                     {p.name}
-                    {p.id === currentUser.id && <span className="text-purple-600 font-medium">(You)</span>}
+                    {p.id === effectiveCurrentUser.id && <span className="text-purple-600 font-medium">(You)</span>}
                   </span>
-                  {p.id !== currentUser.id && (
+                  {p.id !== effectiveCurrentUser.id && (
                     <button
                       onClick={() => removePlayer(p.id)}
                       className="ml-1 w-4 h-4 rounded-full bg-gray-300 hover:bg-red-400 text-gray-600 hover:text-white flex items-center justify-center text-xs font-bold transition-colors"
@@ -1101,7 +1012,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
               <g>
                 {/* Timeline lines - one per player */}
                 {activePlayers.map((p, playerIndex) => {
-                  const isCurrentUser = p.id === currentUser.id;
+                  const isCurrentUser = p.id === effectiveCurrentUser.id;
                   const y = baseTimelineY + (playerIndex * (laneHeight + laneSpacing));
                   
                   return (
@@ -1120,7 +1031,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                 
                 {/* Player indicators above each timeline */}
                 {activePlayers.map((p, playerIndex) => {
-                  const isCurrentUser = p.id === currentUser.id;
+                  const isCurrentUser = p.id === effectiveCurrentUser.id;
                   const y = baseTimelineY + (playerIndex * (laneHeight + laneSpacing));
                   
                   // Generate color scheme based on player's assigned color
@@ -1301,7 +1212,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
               {/* Event icons along each player's timeline */}
               {activePlayers.map((p, playerIndex) => {
                 const y = baseTimelineY + (playerIndex * (laneHeight + laneSpacing));
-                const isCurrentUser = p.id === currentUser.id;
+                const isCurrentUser = p.id === effectiveCurrentUser.id;
                 return (
                   <g key={p.id + "-events"}>
                     {p.events.map((e: any) => {
@@ -1713,7 +1624,7 @@ export default function TennisJourneyMap({ currentUser = CURRENT_USER as PlayerT
                       filteredResults.map((player) => {
                         // Check if player has overlapping events with current user
                         const overlappingEvents = player.events.filter(eventA => 
-                          currentUser.events.some(eventB => 
+                          effectiveCurrentUser.events.some(eventB => 
                             eventA.id === eventB.id || 
                             (eventA.meta?.location === eventB.meta?.location && 
                              eventA.date === eventB.date && 
