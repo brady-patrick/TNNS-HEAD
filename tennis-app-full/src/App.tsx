@@ -1,10 +1,6 @@
 import React, { useMemo, useState, useContext, createContext, cloneElement, useEffect, memo } from "react";
 import {
-  Home as HomeIcon,
-  Search,
-  Users,
   BarChart2,
-  Settings as SettingsIcon,
   ChevronDown,
   Video,
   Upload,
@@ -16,7 +12,12 @@ import {
   Trophy,
   ArrowLeft,
   Home,
+  TrendingUp,
+  TrendingDown,
+  X,
 } from "lucide-react";
+import { Navigation } from "./components/Navigation";
+import { TennisStatsDrawer } from "./components/StatsDrawer";
 
 // ============================================================
 // Minimal local UI primitives (anonymized) so the file runs
@@ -92,6 +93,8 @@ export function SheetContent({ className, children }: any) {
 export function SheetHeader({ className, ...props }: any) { return <div className={cn("mb-2", className)} {...props} />; }
 export function SheetTitle({ className, ...props }: any) { return <h4 className={cn("text-base font-semibold", className)} {...props} />; }
 
+
+
 // ============================================================
 // Optimized header with non-blocking avatar
 // ============================================================
@@ -125,7 +128,7 @@ const PageHeaderBannerAvatar = memo(function PageHeaderBannerAvatar({
       <div className="h-40 w-full rounded-xl bg-gradient-to-t from-[#FBC5EC] to-[#A5C0EE] lg:h-60" />
 
       {/* Content row */}
-      <div className="m-auto -mt-12 w-full max-w-[1200px] px-3 lg:-mt-10 lg:px-8">
+      <div className="m-auto -mt-12 w-full px-3 lg:-mt-10 lg:px-8">
         <div className="flex flex-col gap-4 border-b pb-4 lg:flex-row lg:gap-5 lg:pb-6">
           {/* Avatar + back on mobile */}
           <div className="flex items-start justify-between">
@@ -165,7 +168,7 @@ const PageHeaderBannerAvatar = memo(function PageHeaderBannerAvatar({
               </div>
               <div className="relative max-w-80 min-w-48 flex-1">
                 <Input className="pl-9" placeholder="Search" aria-label="Search" />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <div className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground">🔍</div>
               </div>
             </div>
           </div>
@@ -185,6 +188,144 @@ const me = {
   utr: 7.8,
   usta: 1453,
   nsl: 212,
+  utrTrend: "positive" as "positive" | "negative",
+  ustaTrend: "negative" as "positive" | "negative",
+  nslTrend: "positive" as "positive" | "negative",
+};
+
+// Comprehensive tennis stats data
+const tennisStats = {
+  utr: {
+    current: 7.8,
+    trend: "+0.2",
+    trendDirection: "positive" as "positive" | "negative",
+    history: [
+      { date: "2024-01", rating: 7.2 },
+      { date: "2024-02", rating: 7.3 },
+      { date: "2024-03", rating: 7.4 },
+      { date: "2024-04", rating: 7.5 },
+      { date: "2024-05", rating: 7.6 },
+      { date: "2024-06", rating: 7.7 },
+      { date: "2024-07", rating: 7.8 },
+    ],
+    matches: {
+      total: 47,
+      wins: 32,
+      losses: 15,
+      winRate: "68%",
+      lastMatch: "2024-07-28",
+      lastResult: "W 6-4, 6-4",
+      lastOpponent: "J. Cruz (UTR 7.2)",
+      lastUtrChange: "+0.2"
+    },
+    tournaments: {
+      total: 12,
+      titles: 3,
+      finals: 5,
+      semifinals: 2,
+      quarterfinals: 2
+    },
+    surfaces: {
+      hard: { matches: 28, winRate: "71%" },
+      clay: { matches: 12, winRate: "67%" },
+      grass: { matches: 7, winRate: "57%" }
+    },
+    styles: {
+      aggressive: { matches: 25, winRate: "72%" },
+      defensive: { matches: 15, winRate: "60%" },
+      allCourt: { matches: 7, winRate: "71%" }
+    }
+  },
+  usta: {
+    current: 1453,
+    trend: "-12",
+    trendDirection: "negative" as "positive" | "negative",
+    ranking: "State: #23 | Section: #156 | National: #1,247",
+    history: [
+      { date: "2024-01", points: 1480 },
+      { date: "2024-02", points: 1475 },
+      { date: "2024-03", points: 1470 },
+      { date: "2024-04", points: 1465 },
+      { date: "2024-05", points: 1460 },
+      { date: "2024-06", points: 1455 },
+      { date: "2024-07", points: 1453 },
+    ],
+    events: {
+      total: 18,
+      wins: 12,
+      losses: 6,
+      winRate: "67%",
+      lastEvent: "USTA L6 Poudre Open",
+      lastFinish: "Quarterfinals",
+      lastDate: "2024-07-21"
+    },
+    ageGroups: {
+      "16U": { ranking: "#15", points: 1453 },
+      "18U": { ranking: "#23", points: 1453 }
+    }
+  },
+  nsl: {
+    current: 212,
+    trend: "+8",
+    trendDirection: "positive" as "positive" | "negative",
+    ranking: "National: #212 | Regional: #18 | State: #3",
+    history: [
+      { date: "2024-01", ranking: 245 },
+      { date: "2024-02", ranking: 238 },
+      { date: "2024-03", ranking: 230 },
+      { date: "2024-04", ranking: 225 },
+      { date: "2024-05", ranking: 220 },
+      { date: "2024-06", ranking: 215 },
+      { date: "2024-07", ranking: 212 },
+    ],
+    ladder: {
+      total: 24,
+      wins: 18,
+      losses: 6,
+      winRate: "75%",
+      currentStreak: 4,
+      bestStreak: 7
+    }
+  },
+  performance: {
+    serve: {
+      firstServe: "68%",
+      firstServeWon: "72%",
+      secondServeWon: "54%",
+      aces: 47,
+      doubleFaults: 23,
+      aceRate: "12%"
+    },
+    return: {
+      firstServeReturnWon: "28%",
+      secondServeReturnWon: "52%",
+      breakPointsConverted: "41%",
+      returnGamesWon: "35%"
+    },
+    overall: {
+      gamesWon: "58%",
+      setsWon: "62%",
+      matchesWon: "68%",
+      tiebreaks: "55%"
+    }
+  },
+  fitness: {
+    endurance: "8.2/10",
+    speed: "7.8/10",
+    agility: "8.0/10",
+    strength: "7.5/10",
+    flexibility: "8.5/10"
+  },
+  goals: {
+    shortTerm: "Reach UTR 8.0 by end of 2024",
+    mediumTerm: "Win USTA L5 tournament",
+    longTerm: "College tennis scholarship",
+    progress: {
+      utr: { current: 7.8, target: 8.0, percentage: 75 },
+      usta: { current: 1453, target: 1500, percentage: 65 },
+      nsl: { current: 212, target: 200, percentage: 80 }
+    }
+  }
 };
 
 const suggestedPlayers = [
@@ -199,9 +340,12 @@ const upcomingEvents = [
 ];
 
 const journey = [
-  { id: "j1", type: "match", title: "Won 6-4 6-4 vs J. Cruz", date: "Jul 28", meta: "UTR Verified" },
-  { id: "j2", type: "event", title: "Quarterfinals at L6 Poudre Open", date: "Jul 21", meta: "3 matches" },
-  { id: "j3", type: "training", title: "AI session: Serve toss drift", date: "Jul 18", meta: "Drill plan saved" },
+  { id: "j1", type: "match", title: "Won 6-4 6-4 vs J. Cruz", date: "Jul 28", meta: "UTR Verified", result: "W", utrChange: "+0.2" },
+  { id: "j2", type: "event", title: "Quarterfinals at L6 Poudre Open", date: "Jul 21", meta: "3 matches", finish: "QF", matches: 3 },
+  { id: "j3", type: "training", title: "AI session: Serve toss drift", date: "Jul 18", meta: "Drill plan saved", duration: "45m", saved: "Drill Plan" },
+  { id: "j4", type: "match", title: "Lost 7-6(5) 6-3 to M. Zhou", date: "Jul 15", meta: "UTR Verified", result: "L", utrChange: "-0.1" },
+  { id: "j5", type: "event", title: "Semifinals at UTR 7.5+ Challenge", date: "Jul 10", meta: "4 matches", finish: "SF", matches: 4 },
+  { id: "j6", type: "training", title: "AI session: Backhand consistency", date: "Jul 08", meta: "Progress tracked", duration: "60m", saved: "Progress" },
 ];
 
 // NEW: Define allPlayers used by <Players/>
@@ -215,13 +359,19 @@ const allPlayers: Player[] = [
 ];
 
 // ---------- Helper UI ----------
-const Metric = memo(function Metric({ label, value, sub }: { label: string; value: React.ReactNode; sub?: string }) {
+const Metric = memo(function Metric({ label, value, sub, trend }: { label: string; value: React.ReactNode; sub?: string; trend?: "positive" | "negative" }) {
+  const TrendIcon = trend === "positive" ? TrendingUp : trend === "negative" ? TrendingDown : null;
+  const trendColor = trend === "positive" ? "text-green-600" : trend === "negative" ? "text-red-600" : "";
+  
   return (
     <Card className="shadow-sm">
       <CardHeader className="py-4">
         <CardDescription className="text-xs uppercase tracking-wide text-muted-foreground">{label}</CardDescription>
-        <CardTitle className="text-2xl">{value}</CardTitle>
-        {sub && <p className="text-sm text-muted-foreground">{sub}</p>}
+        <div className="flex items-center gap-2">
+          <CardTitle className="text-2xl">{value}</CardTitle>
+          {TrendIcon && <TrendIcon className={`h-5 w-5 ${trendColor}`} />}
+        </div>
+        {sub && !trend && <p className="text-sm text-muted-foreground">{sub}</p>}
       </CardHeader>
     </Card>
   );
@@ -243,17 +393,10 @@ const JourneyItem = memo(function JourneyItem({ item }: { item: { id: string; ty
   );
 });
 
-const SidebarItem = memo(function SidebarItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active?: boolean; onClick?: () => void }) {
-  return (
-    <button onClick={onClick} className={cn("flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm transition", active ? "bg-muted font-medium" : "hover:bg-muted/60") }>
-      <span className="text-muted-foreground">{icon}</span>
-      <span>{label}</span>
-    </button>
-  );
-});
+
 
 // ---------- Pages ----------
-function Landing() {
+function Landing({ statsDrawerOpen, setStatsDrawerOpen }: { statsDrawerOpen: boolean; setStatsDrawerOpen: (open: boolean) => void }) {
   // Defer heavy lists until after first paint
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -277,115 +420,237 @@ function Landing() {
       {/* Page Header */}
       <PageHeaderBannerAvatar name={me.name} email={me.email} avatarUrl={me.avatar} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        {/* Profile */}
-        <Card className="col-span-1 lg:col-span-2 shadow-sm">
-          <CardHeader className="flex-row items-center gap-4">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={PLACEHOLDER_AVATAR} alt={me.name} />
-              <AvatarFallback>OR</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <CardTitle className="text-xl">{me.name}</CardTitle>
-              <CardDescription className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" />{me.location} • Age {me.age}</CardDescription>
-            </div>
-            <Button className="gap-2"><Sparkles className="h-4 w-4" />AI Coaching</Button>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <Metric label="UTR" value={me.utr} />
-            <Metric label="USTA Rank" value={me.usta} />
-            <Metric label="NSL Rank" value={me.nsl} />
-            <Metric label="Sessions" value={12} sub="AI coaching history" />
-          </CardContent>
-        </Card>
+      {/* View All Stats Button */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900">Your ratings</h2>
+        <Button 
+          variant="outline" 
+          className="gap-2 border-2 px-6 py-2"
+          onClick={() => setStatsDrawerOpen(!statsDrawerOpen)}
+        >
+          <BarChart2 className="h-4 w-4" />
+          {statsDrawerOpen ? "Close stats" : "View all"}
+        </Button>
+      </div>
 
-        {/* Upload CTA */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Upload a video for AI coaching</CardTitle>
-            <CardDescription>Drag and drop or choose a file. We analyze form, footwork, and tactics.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-xl border border-dashed p-6 text-center">
-              <Video className="mx-auto mb-2 h-6 w-6" />
-              <p className="text-sm mb-3 text-muted-foreground">.mp4, .mov up to 1 GB</p>
-              <div className="flex items-center justify-center gap-2">
-                <Button variant="secondary" className="gap-2"><Upload className="h-4 w-4" />Upload</Button>
-                <Button variant="ghost" className="gap-2"><Paperclip className="h-4 w-4" />Attach URL</Button>
+      {/* Player Rankings Metrics */}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Metric label="UTR Rating" value={me.utr} sub="Universal Tennis Rating" trend={me.utrTrend} />
+        <Metric label="USTA Ranking" value={me.usta} sub="United States Tennis Association" trend={me.ustaTrend} />
+        <Metric label="NSL Ranking" value={me.nsl} sub="National Singles Ladder" trend={me.nslTrend} />
+      </div>
+
+      {/* Journey timeline - Full width */}
+      <Card className="col-span-1 lg:col-span-3 shadow-sm overflow-hidden">
+        <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl text-gray-900">Your Tennis Journey</CardTitle>
+              <CardDescription className="text-sm text-gray-600">Track your progress, achievements, and growth as a player</CardDescription>
+            </div>
+            <Button variant="outline" className="gap-2 border-2 px-4 py-2">
+              <BarChart2 className="h-4 w-4" />
+              View Full Journey
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="relative">
+            {/* Timeline line */}
+            <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-200 via-indigo-200 to-purple-200 animate-pulse"></div>
+            
+            <div className="space-y-0">
+              {mounted ? (
+                journey.map((j, index) => (
+                  <div key={j.id} className="relative group hover:bg-gray-50 transition-colors">
+                    {/* Timeline dot */}
+                    <div className={`absolute left-6 top-6 w-4 h-4 rounded-full border-4 border-white shadow-lg z-10 ${
+                      j.type === "match" ? "bg-gradient-to-r from-green-500 to-emerald-500" :
+                      j.type === "event" ? "bg-gradient-to-r from-orange-500 to-amber-500" :
+                      "bg-gradient-to-r from-purple-500 to-pink-500"
+                    }`}></div>
+                    
+                    <div className="pl-20 pr-6 py-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
+                              j.type === "match" ? "bg-gradient-to-r from-green-100 to-emerald-100" :
+                              j.type === "event" ? "bg-gradient-to-r from-orange-100 to-amber-100" :
+                              "bg-gradient-to-r from-purple-100 to-pink-100"
+                            }`}>
+                              {j.type === "match" ? <Trophy className="h-4 w-4 text-green-600" /> : 
+                               j.type === "event" ? <Calendar className="h-4 w-4 text-orange-600" /> : 
+                               <Sparkles className="h-4 w-4 text-purple-600" />}
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">{j.title}</h4>
+                              <p className="text-sm text-gray-500">{j.date}</p>
+                            </div>
+                          </div>
+                          {j.meta && (
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-xs px-2 py-1 bg-blue-50 text-blue-700 border-blue-200">
+                                {j.meta}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Journey stats preview */}
+                        <div className="hidden lg:flex items-center gap-4 text-sm text-gray-500">
+                          {j.type === "match" && (
+                            <>
+                              <div className="text-center">
+                                <div className={`font-semibold ${j.result === "W" ? "text-green-600" : "text-red-600"}`}>
+                                  {j.result}
+                                </div>
+                                <div className="text-xs">Result</div>
+                              </div>
+                              <div className="text-center">
+                                <div className={`font-semibold ${j.utrChange?.startsWith("+") ? "text-green-600" : "text-red-600"}`}>
+                                  {j.utrChange}
+                                </div>
+                                <div className="text-xs">UTR</div>
+                              </div>
+                            </>
+                          )}
+                          {j.type === "event" && (
+                            <>
+                              <div className="text-center">
+                                <div className="font-semibold text-orange-600">{j.finish}</div>
+                                <div className="text-xs">Finish</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-semibold text-blue-600">{j.matches}</div>
+                                <div className="text-xs">Matches</div>
+                              </div>
+                            </>
+                          )}
+                          {j.type === "training" && (
+                            <>
+                              <div className="text-center">
+                                <div className="font-semibold text-purple-600">{j.duration}</div>
+                                <div className="text-xs">Duration</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="font-semibold text-green-600">{j.saved}</div>
+                                <div className="text-xs">Saved</div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Hover effect line */}
+                    <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-transparent group-hover:bg-gradient-to-b group-hover:from-blue-400 group-hover:to-indigo-400 transition-all duration-300"></div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-6">
+                  <SkeletonLines count={3} />
+                </div>
+              )}
+            </div>
+            
+            {/* Journey progress indicator */}
+            <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-blue-50 border-t">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  <span className="text-gray-600">Journey in progress</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-gray-500">Next milestone: UTR 8.0</span>
+                  <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{width: '75%'}}></div>
+                  </div>
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Journey timeline */}
-        <Card className="col-span-1 lg:col-span-2 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Latest activity</CardTitle>
-            <CardDescription>Your recent matches, events, and coaching sessions</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {mounted ? (
-              journey.map((j) => <JourneyItem key={j.id} item={j} />)
-            ) : (
-              <SkeletonLines count={3} />
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Suggested matches */}
-        <Card className="shadow-sm">
-          <CardHeader className="flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-lg">Suggested matches</CardTitle>
-              <CardDescription>Players near your UTR and location</CardDescription>
+      {/* AI Coaching CTA */}
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg">Upload a video for AI coaching</CardTitle>
+          <CardDescription>Drag and drop or choose a file. We analyze form, footwork, and tactics.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-xl border border-dashed p-6 text-center">
+            <Video className="mx-auto mb-2 h-6 w-6" />
+            <p className="text-sm mb-3 text-muted-foreground">.mp4, .mov up to 1 GB</p>
+            <div className="flex items-center justify-center gap-2">
+              <Button variant="secondary" className="gap-2"><Upload className="h-4 w-4" />Upload</Button>
+              <Button variant="ghost" className="gap-2"><Paperclip className="h-4 w-4" />Attach URL</Button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {mounted ? (
-              suggestedPlayers.map((p) => (
-                <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8"><AvatarFallback>{p.name.slice(0,2)}</AvatarFallback></Avatar>
-                    <div>
-                      <div className="text-sm font-medium">{p.name}</div>
-                      <div className="text-xs text-muted-foreground">UTR {p.utr} • {p.location}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge>Invite</Badge>
-                    <Button size="sm" className="gap-1">Request match</Button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <SkeletonCards count={3} />
-            )}
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* Suggested events */}
-        <Card className="shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg">Suggested events</CardTitle>
-            <CardDescription>Based on your UTR, rankings, and distance</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {mounted ? (
-              upcomingEvents.map((e) => (
-                <div key={e.id} className="flex items-center justify-between rounded-lg border p-3">
+      {/* Suggested matches */}
+      <Card className="shadow-sm">
+        <CardHeader className="flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-lg">Suggested matches</CardTitle>
+            <CardDescription>Players near your UTR and location</CardDescription>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {mounted ? (
+            suggestedPlayers.map((p) => (
+              <div key={p.id} className="flex items-center justify-between rounded-lg border p-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8"><AvatarFallback>{p.name.slice(0,2)}</AvatarFallback></Avatar>
                   <div>
-                    <div className="text-sm font-medium">{e.name}</div>
-                    <div className="text-xs text-muted-foreground">{e.date} • {e.city} • {e.surface}</div>
+                    <div className="text-sm font-medium">{p.name}</div>
+                    <div className="text-xs text-muted-foreground">UTR {p.utr} • {p.location}</div>
                   </div>
-                  <Button size="sm" variant="secondary" className="gap-1"><Calendar className="h-4 w-4" />View</Button>
                 </div>
-              ))
-            ) : (
-              <SkeletonCards count={2} />
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                <div className="flex items-center gap-2">
+                  <Badge>Invite</Badge>
+                  <Button size="sm" className="gap-1">Request match</Button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <SkeletonCards count={3} />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Suggested events */}
+      <Card className="shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg">Suggested events</CardTitle>
+          <CardDescription>Based on your UTR, rankings, and distance</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {mounted ? (
+            upcomingEvents.map((e) => (
+              <div key={e.id} className="flex items-center justify-between rounded-lg border p-3">
+                <div>
+                  <div className="text-sm font-medium">{e.name}</div>
+                  <div className="text-xs text-muted-foreground">{e.date} • {e.city} • {e.surface}</div>
+                </div>
+                <Button size="sm" variant="secondary" className="gap-1"><Calendar className="h-4 w-4" />View</Button>
+              </div>
+            ))
+          ) : (
+            <SkeletonCards count={2} />
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Tennis Stats Drawer */}
+      <TennisStatsDrawer 
+        open={statsDrawerOpen} 
+        onOpenChange={setStatsDrawerOpen} 
+        tennisStats={tennisStats} 
+      />
     </div>
   );
 }
@@ -405,7 +670,7 @@ function Players() {
             <CardDescription>Browse, filter, and request matches</CardDescription>
           </div>
           <div className="flex items-center gap-2">
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search players" className="w-56" />
+            <Input value={q} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQ(e.target.value)} placeholder="Search players" className="w-56" />
             <Button variant="secondary" className="gap-2">Filters</Button>
           </div>
         </CardHeader>
@@ -506,7 +771,7 @@ function Coaching() {
                 </div>
               </SheetContent>
             </Sheet>
-            <Textarea value={input} onChange={(e) => setInput(e.target.value)} placeholder="Ask about technique, tactics, or fitness" className="resize-none" />
+            <Textarea value={input} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)} placeholder="Ask about technique, tactics, or fitness" className="resize-none" />
             <Button onClick={send} className="gap-1"><Sparkles className="h-4 w-4" />Send</Button>
           </div>
         </CardContent>
@@ -629,6 +894,7 @@ type Route = "home" | "players" | "coaching" | "events" | "settings";
 
 export default function App() {
   const [route, setRoute] = useState<Route>("home");
+  const [statsDrawerOpen, setStatsDrawerOpen] = useState(false);
 
   // DEV TESTS: Basic invariants to catch regressions (run once in dev)
   useEffect(() => {
@@ -645,67 +911,34 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-[1200px] gap-6 px-4 py-6">
-        {/* Sidebar */}
-        <aside className="hidden w-[280px] shrink-0 rounded-2xl border bg-card p-4 md:block">
-          <div className="flex items-center gap-3 px-2 py-2">
-            <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-200 to-purple-400" />
-            <div>
-              <div className="text-lg font-semibold">Untitled UI</div>
-              <div className="text-xs text-muted-foreground">Tennis</div>
-            </div>
-          </div>
-          <div className="mt-3">
-            <div className="relative">
-              <Input placeholder="Search" className="pl-9" />
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            </div>
-          </div>
-          <nav className="mt-4 space-y-1">
-            <SidebarItem icon={<HomeIcon className="h-4 w-4" />} active={route === "home"} onClick={() => setRoute("home")} label="Home" />
-            <SidebarItem icon={<Users className="h-4 w-4" />} active={route === "players"} onClick={() => setRoute("players")} label="Players" />
-            <SidebarItem icon={<Sparkles className="h-4 w-4" />} active={route === "coaching"} onClick={() => setRoute("coaching")} label="AI Coaching" />
-            <SidebarItem icon={<Calendar className="h-4 w-4" />} active={route === "events"} onClick={() => setRoute("events")} label="Events" />
-            <SidebarItem icon={<SettingsIcon className="h-4 w-4" />} active={route === "settings"} onClick={() => setRoute("settings")} label="Settings" />
-          </nav>
-          <Separator className="my-4" />
-          <div className="space-y-2 rounded-xl bg-muted/50 p-3">
-            <div className="text-xs font-medium">Support</div>
-            <div className="flex items-center justify-between text-sm"><span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500" />Online</span><Button size="sm" variant="secondary">Open chat</Button></div>
-          </div>
+      <div className="flex w-full h-screen">
+        {/* Sidebar - Fixed width, always visible */}
+        <Navigation route={route} setRoute={setRoute} user={me} />
 
-          <div className="mt-20 rounded-xl border p-3">
-            <div className="flex items-center gap-2">
-              <Avatar className="h-8 w-8"><AvatarImage src={PLACEHOLDER_AVATAR} alt={me.name} /><AvatarFallback>OR</AvatarFallback></Avatar>
-              <div className="text-sm">
-                <div className="font-medium">{me.name}</div>
-                <div className="text-xs text-muted-foreground">{me.email}</div>
+        {/* Main content area - Fills remaining space */}
+        <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${statsDrawerOpen ? 'pr-[500px] lg:pr-[500px] md:pr-[90vw]' : ''}`}>
+          {/* Mobile top bar */}
+          <div className="md:hidden border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex h-14 items-center justify-between px-4">
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-200 to-purple-400" />
+                <div className="text-base font-semibold">Untitled UI Tennis</div>
               </div>
+              <MobileMenu route={route} setRoute={setRoute} />
             </div>
           </div>
-        </aside>
 
-        {/* Mobile top bar */}
-        <div className="md:hidden fixed inset-x-0 top-0 z-10 border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-200 to-purple-400" />
-              <div className="text-base font-semibold">Untitled UI Tennis</div>
+          {/* Main content */}
+          <main className="flex-1 overflow-auto">
+            <div className={`p-6 space-y-6 transition-all duration-300 ${statsDrawerOpen ? 'max-w-none' : ''}`}>
+              {route === "home" && <Landing statsDrawerOpen={statsDrawerOpen} setStatsDrawerOpen={setStatsDrawerOpen} />}
+              {route === "players" && <Players />}
+              {route === "coaching" && <Coaching />}
+              {route === "events" && <Events />}
+              {route === "settings" && <Settings />}
             </div>
-            <MobileMenu route={route} setRoute={setRoute} />
-          </div>
+          </main>
         </div>
-
-        {/* Main */}
-        <main className="flex-1 md:pt-0 pt-16">
-          <div className="space-y-6">
-            {route === "home" && <Landing />}
-            {route === "players" && <Players />}
-            {route === "coaching" && <Coaching />}
-            {route === "events" && <Events />}
-            {route === "settings" && <Settings />}
-          </div>
-        </main>
       </div>
     </div>
   );
