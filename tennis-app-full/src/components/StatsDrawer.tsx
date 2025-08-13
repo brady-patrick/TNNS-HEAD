@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { X, BarChart2 } from "lucide-react";
-import { Button, Card } from "../App";
+import { Button, Card } from "./base";
 
 // Stats Drawer Context
 const StatsDrawerCtx = createContext<{ open: boolean; setOpen: (v: boolean) => void } | null>(null);

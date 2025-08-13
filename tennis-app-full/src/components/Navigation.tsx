@@ -7,7 +7,7 @@ import {
   Calendar,
   Settings as SettingsIcon,
 } from "lucide-react";
-import { Input, Separator, Avatar, AvatarImage, AvatarFallback, Button } from "../App";
+import { Input, Separator, Avatar, AvatarImage, AvatarFallback, Button } from "./base";
 
 // Utility function for class names
 const cn = (...c: Array<string | undefined | false>) => c.filter(Boolean).join(" ");
@@ -97,12 +97,6 @@ export function Navigation({ route, setRoute, user }: NavigationProps) {
           onClick={() => setRoute("events")} 
           label="Events" 
         />
-        <SidebarItem 
-          icon={<SettingsIcon className="h-4 w-4" />} 
-          active={route === "settings"} 
-          onClick={() => setRoute("settings")} 
-          label="Settings" 
-        />
       </nav>
 
       <Separator className="my-4" />
@@ -123,7 +117,10 @@ export function Navigation({ route, setRoute, user }: NavigationProps) {
       <div className="flex-1" />
 
       {/* User profile - now pinned to bottom */}
-      <div className="rounded-xl border p-3">
+      <button 
+        onClick={() => setRoute("settings")}
+        className="w-full rounded-xl border p-3 hover:bg-muted/60 transition-colors text-left"
+      >
         <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar || PLACEHOLDER_AVATAR} alt={user.name} />
@@ -134,7 +131,7 @@ export function Navigation({ route, setRoute, user }: NavigationProps) {
             <div className="text-xs text-muted-foreground">{user.email}</div>
           </div>
         </div>
-      </div>
+      </button>
     </aside>
   );
 }
